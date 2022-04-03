@@ -1,0 +1,95 @@
+expression %player% has guild:
+    return type: boolean
+    get:
+        set {_return} to false
+        load yaml "plugins/guilds/data/players/%expression-1%.yml" as "%expression-1%.player"
+        set {_return} to yaml value "guild" from "%expression-1%.player"
+        unload yaml "%expression-1%.player"
+        if {_return} is not "brak":
+            set {_return} to true
+        return {_return}
+
+expression guild tag %text% exists:
+    return type: boolean
+    get:
+        if yaml file "plugins/guilds/data/guilds/%expression-1%.yml" doesn't exist:
+            set {_return} to false
+        else:
+            set {_return} to true
+        return {_return}
+
+expression guild name %text% exists:
+    return type: boolean
+    get:
+        set {_return} to false
+        load all yaml from directory "plugins/guilds/data/guilds"
+        loop all of the currently loaded yaml files:
+            if loop-value contains "plugins/guilds/data/guilds/":
+                if yaml value "name" from loop-value is expression-1:
+                    set {_return} to true
+            unload loop-value
+        return {_return}
+
+on join:
+    if yaml file "plugins/guilds/data/players/%player%.yml" doesn't exist:
+        load yaml "plugins/guilds/data/players/%player%.yml" as "%player%.player"
+        set yaml value "guild" from "%player%.player" to "brak"
+        set yaml value "points" from "%player%.player" to 1000
+        set yaml value "kills" from "%player%.player" to 0
+        set yaml value "deaths" from "%player%.player" to 0
+        save yaml "%player%.player"
+        unload yaml "%player%.player"
+
+command /g [<text>] [<text>] [<text>]:
+    trigger:
+        if arg-1 is not set:
+            send "&8✦ &8&m-=-=-=-=-=&r &8( &3&lGILDIE &8)&8&m=-=-=-=-=-&r &8✦"
+            send "&8✦ &3/g zaloz [tag] [nazwa] &8- &7tworzy gildie"
+            stop
+        if arg-1 is "zaloz":
+            if arg-2 is not set:
+                send "&8✦ &cPodaj tag gildii!"
+                stop
+            if length of arg-2 < 2:
+                send "&8✦ &cTag gildii musi zawierać przynajmniej 2 znaki!"
+                stop
+            if length of arg-2 > 5:
+                send "&8✦ &cTag gildii nie może zawierać więcej niż 5 znaki!"
+                stop
+            if arg-3 is not set:
+                send "&8✦ &cPodaj nazwę gildii!"
+                stop
+            if length of arg-3 < 5:
+                send "&8✦ &cNazwa gildii musi zawierać przynajmniej 5 znaków!"
+                stop
+            if length of arg-3 > 15:
+                send "&8✦ &cNazwa gildii nie może zawierać więcej niż 15 znaków!"
+                stop
+            #sprawdz czy gracz jest w gildii
+            if player has guild is true:
+                send "&8✦ &cJesteś już w gildii!"
+                stop
+            #sprawdz czy gildia o podanym tagu nie istnieje
+            if guild tag arg-2 exists is true:
+                send "&8✦ &cGildia o podanym tagu istnieje!"
+                stop
+            #sprawdz czy gildia o podanej nazwie nie istnieje
+            if guild name arg-3 exists is true:
+                send "&8✦ &cGildia o podanej nazwie istnieje!" 
+            #sprawdz czy gracz może w tym miejscu założyć gildię
+            #załóż gildie
+            load yaml "plugins/guilds/data/guilds/%arg-2%.yml" as "%arg-2%.guild"
+            set yaml value "tag" from "%arg-2%.guild" to arg-2
+            set yaml value "name" from "%arg-2%.guild" to arg-3
+            set yaml value "owner" from "%arg-2%.guild" to player's name
+            set yaml list "members" from "%arg-2%.guild" to player's name
+            save yaml "%arg-2%.guild"
+            unload yaml "%arg-2%.guild"
+            #ustaw graczowi gildie
+            load yaml "plugins/guilds/data/players/%player's name%.yml" as "%player's name%.player"
+            set yaml value "guild" from "%player's name%.player" to arg-2
+            save yaml "%player's name%.player"
+            unload yaml "%player's name%.player"
+            #ogłos założenie gildii
+            broadcast "&8✦ &7Gracz &3%player's name% &7założył gildie o tagu &3%arg-2% &7i nazwie &3%arg-3%"
+            stop

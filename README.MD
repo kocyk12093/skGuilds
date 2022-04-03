@@ -1,0 +1,1 @@
+Wymagane pluginy: skript-reflect, skript-yaml
