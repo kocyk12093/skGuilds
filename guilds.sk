@@ -44,7 +44,7 @@ command /g [<text>] [<text>] [<text>]:
     trigger:
         if arg-1 is not set:
             send "&8✦ &8&m-=-=-=-=-=&r &8( &3&lGILDIE &8)&8&m=-=-=-=-=-&r &8✦"
-            send "&8✦ &3/g zaloz [tag] [nazwa] &8- &7tworzy gildie"
+            send "&8✦ &3/g zaloz [tag] [nazwa] &8- &7tworzy gildie!"
             stop
         if arg-1 is "zaloz":
             if arg-2 is not set:
